@@ -2,7 +2,8 @@ import json
 import os
 import requests
 import pyperclip
-from tkinter import filedialog, messagebox, Toplevel, Listbox, Scrollbar, HORIZONTAL, VERTICAL
+from tkinter import filedialog, Toplevel, Listbox, Scrollbar, HORIZONTAL, VERTICAL
+from tkinter import messagebox as mb
 from tkinter import ttk
 import tkinter as tk
 
@@ -12,13 +13,13 @@ history_file = "upload_history.json"
 def save_history(file_path, download_link):
     history = []
     if os.path.exists(history_file):
-        with open(history_file, "r") as file:
-            history = json.load(file)
+        with open(history_file, "r") as f:
+            history = json.load(f)
 
     history.append({"file_path": os.path.basename(file_path), "download_link": download_link})
 
-    with open(history_file, "w") as file:
-        json.dump(history, file, indent=4)
+    with open(history_file, "w") as f:
+        json.dump(history, f, indent=4)
 
 
 def upload_file():
@@ -35,20 +36,20 @@ def upload_file():
                     link_entry.insert(0, download_link)
                     pyperclip.copy(download_link)
                     save_history(filepath, download_link)
-                    messagebox.showinfo("Ссылка скопирована", "Ссылка успешно скопирована в буфер обмена")
+                    mb.showinfo("Ссылка скопирована", f"Ссылка успешно скопирована в буфер обмена")
                 else:
                     raise ValueError("Не удалось получить ссылку для скачивания")
     except requests.RequestException as e:
-        messagebox.showerror("Ошибка сети", f"Произошла ошибка сети: {e}")
+        mb.showerror("Ошибка сети", f"Произошла ошибка сети: {e}")
     except ValueError as ve:
-        messagebox.showerror("Ошибка", str(ve))
+        mb.showerror("Ошибка", str(ve))
     except Exception as ex:
-        messagebox.showerror("Ошибка", f"Произошла неизвестная ошибка: {ex}")
+        mb.showerror("Ошибка", f"Произошла неизвестная ошибка: {ex}")
 
 
 def show_history():
     if not os.path.exists(history_file):
-        messagebox.showinfo("История", "История загрузок пуста")
+        mb.showinfo("История", "История загрузок пуста")
         return
 
     history_window = Toplevel(window)
@@ -60,23 +61,23 @@ def show_history():
     links_listbox = Listbox(history_window, width=50, height=20)
     links_listbox.grid(row=0, column=1, padx=(0,10), pady=10)
 
-    with open(history_file, "r") as file:
-        history = json.load(file)
+    with open(history_file, "r") as f:
+        history = json.load(f)
         for item in history:
-            files_listbox.insert(END, item['file_path'])
-            links_listbox.insert(END, item['download_link'])
+            files_listbox.insert(END, item["file_path"])
+            links_listbox.insert(END, item["download_link"])
 
 
-app = tk.Tk()
-app.title("TempFile Share")
+window = tk.Tk()
+window.title("TempFile Share")
 
-upload_button = ttk.Button(app, text="Upload File", command=upload_file)
+upload_button = ttk.Button(text="Upload File", command=upload_file)
 upload_button.pack()
 
-link_entry = ttk.Entry(app)
+link_entry = ttk.Entry(window)
 link_entry.pack()
 
-history_button = ttk.Button(app, text="Показать Историю", command=show_history)
+history_button = ttk.Button(text="Показать Историю", command=show_history)
 history_button.pack()
 
-app.mainloop()
+window.mainloop()
