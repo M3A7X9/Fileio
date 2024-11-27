@@ -46,6 +46,27 @@ def upload_file():
         messagebox.showerror("Ошибка", f"Произошла неизвестная ошибка: {ex}")
 
 
+def show_history():
+    if not os.path.exists(history_file):
+        messagebox.showinfo("История", "История загрузок пуста")
+        return
+
+    history_window = Toplevel(window)
+    history_window.title("История Загрузок")
+
+    files_listbox = Listbox(history_window, width=50, height=20)
+    files_listbox.grid(row=0, column=0, padx=(10,0), pady=10)
+
+    links_listbox = Listbox(history_window, width=50, height=20)
+    links_listbox.grid(row=0, column=1, padx=(0,10), pady=10)
+
+    with open(history_file, "r") as file:
+        history = json.load(file)
+        for item in history:
+            files_listbox.insert(END, item['file_path'])
+            links_listbox.insert(END, item['download_link'])
+
+
 app = tk.Tk()
 app.title("TempFile Share")
 
@@ -54,5 +75,8 @@ upload_button.pack()
 
 link_entry = ttk.Entry(app)
 link_entry.pack()
+
+history_button = ttk.Button(app, text="Показать Историю", command=show_history)
+history_button.pack()
 
 app.mainloop()
